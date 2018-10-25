@@ -10,8 +10,14 @@ namespace ConsoleCanvasTracker
     [DataContract(Name = "assignments")]
     class CanvasAssignmentsParse
     {
+        [DataMember(Name = "id")]
+        public Int64 ID { get; set; }
+
         [DataMember(Name ="name")]
         public string AssignmentName { get; set; }
+
+        [DataMember(Name = "submission")]
+        public string Submission { get; set; }
 
         [DataMember(Name = "due_at")]
         private string DueDate { get; set; }
