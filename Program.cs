@@ -10,7 +10,10 @@ using System.Security;
 
 
 /* Program written by Bryce Palmer to go recieve due assignments and remind
-    users of due assignments and how long they have to do said assignment */
+    users of due assignments and how long they have to do said assignment.
+    Currently only meant to test interactions with the Canvas API and parsing JSON.
+    Only can send text reminders to AT&T phone numbers for testing purposes.   
+*/
 
 namespace ConsoleCanvasTracker
 {
@@ -18,7 +21,7 @@ namespace ConsoleCanvasTracker
     {
         private static readonly HttpClient Client = new HttpClient();
         private static string AccessToken;
-        private static bool AssignmentsDue = false;
+        private static int AssignmentsDue = 0;
 
         static void Main(string[] args)
         {
@@ -34,7 +37,9 @@ namespace ConsoleCanvasTracker
                 Console.WriteLine("-------------------------------------------------------------------------------------------------");
                 Console.WriteLine();
                 Console.WriteLine("Please type your access token here");
-                AccessToken = Console.ReadLine();
+                 AccessToken = Console.ReadLine(); 
+               // GetAccessToAccount().Wait();
+
                 Console.WriteLine("Would you like to implement a text reminder?");
 
 
@@ -70,7 +75,7 @@ namespace ConsoleCanvasTracker
                     PhoneNumber = Console.ReadLine();
 
                     ProcessResults().Wait();
-                    if (AssignmentsDue == true)
+                    if (AssignmentsDue > 0)
                     {
                         SendEmail(Email, EmailPassword, PhoneNumber);
                     }
@@ -152,7 +157,7 @@ namespace ConsoleCanvasTracker
                 }
                 else
                 {
-                    AssignmentsDue = true;
+                    AssignmentsDue = AssignmentsDue + 1;
                     Console.WriteLine(Assignment.AssignmentName);
                     Console.WriteLine(Assignment.TimeDue);
                     Console.WriteLine();
@@ -167,7 +172,7 @@ namespace ConsoleCanvasTracker
         {
             try
             {
-                MailMessage TextMessage = new MailMessage(Email, String.Format("{0}@text.att.net", PhoneNumber),"","Hey! You have homework to do!");
+                MailMessage TextMessage = new MailMessage(Email, String.Format("{0}@text.att.net", PhoneNumber),"",String.Format("Hey there! You have {0} assignments due in the future. Make sure to check Canvas and do them!",AssignmentsDue));
 
 
                 SmtpClient EmailClient = new SmtpClient("smtp.gmail.com");
@@ -188,5 +193,12 @@ namespace ConsoleCanvasTracker
 
 
         }
+
+
+
+       /* private static async Task GetAccessToAccount()
+        {
+
+        }*/
     }
 }
