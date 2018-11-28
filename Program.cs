@@ -195,10 +195,5 @@ namespace ConsoleCanvasTracker
         }
 
 
-
-       /* private static async Task GetAccessToAccount()
-        {
-
-        }*/
     }
 }
