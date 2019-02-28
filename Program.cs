@@ -9,7 +9,8 @@ using System.Security;
 
 
 
-/* Program written by Bryce Palmer to go recieve due assignments and remind
+/*
+    Program written by Bryce Palmer to go recieve due assignments and remind
     users of due assignments and how long they have to do said assignment.
     Currently only meant to test interactions with the Canvas API and parsing JSON.
     Only can send text reminders to AT&T phone numbers for testing purposes.   
@@ -112,9 +113,10 @@ namespace ConsoleCanvasTracker
 
             //Clear the request headers
             Client.DefaultRequestHeaders.Accept.Clear();
+            Client.DefaultRequestHeaders.Add("Authorization", String.Format("Bearer {0}", AccessToken));
 
             //Get the courses stream 
-            var CoursesStreamTask = Client.GetStreamAsync(String.Format("https://canvas.instructure.com/api/v1/courses?access_token={0}", AccessToken));
+            var CoursesStreamTask = Client.GetStreamAsync("https://canvas.instructure.com/api/v1/courses");
 
             //Set the stream into a value of lists
             var CoursesResults = CourseSerializer.ReadObject(await CoursesStreamTask) as List<CanvasCourseParse>;
@@ -122,11 +124,13 @@ namespace ConsoleCanvasTracker
             //Go into each individual course
             foreach (var Course in CoursesResults)
             {
-                Console.WriteLine(Course.CourseName);
-                Console.WriteLine();
+                if(Course.CourseName != null)
+                {
+                    Console.WriteLine(Course.CourseName);
+                    Console.WriteLine();
 
-                AssignmentGrab(Course).Wait();
-
+                    AssignmentGrab(Course).Wait();
+                }
 
             }
 
@@ -142,7 +146,7 @@ namespace ConsoleCanvasTracker
             Console.WriteLine("--------------------------------------------");
 
             //Start the Assignments Stream
-            var AssignmentsStreamTask = Client.GetStreamAsync(String.Format("https://canvas.instructure.com/api/v1/courses/{0}/assignments?access_token={1}", Course.CourseID, AccessToken));
+            var AssignmentsStreamTask = Client.GetStreamAsync(String.Format("https://canvas.instructure.com/api/v1/courses/{0}/assignments", Course.CourseID));
 
             //Set the stream into a list
             var AssignmentsResults = AssignmentSerializer.ReadObject(await AssignmentsStreamTask) as List<CanvasAssignmentsParse>;
@@ -172,7 +176,7 @@ namespace ConsoleCanvasTracker
         {
             try
             {
-                MailMessage TextMessage = new MailMessage(Email, String.Format("{0}@text.att.net", PhoneNumber),"",String.Format("Hey there! You have {0} assignments due in the future. Make sure to check Canvas and do them!",AssignmentsDue));
+                MailMessage TextMessage = new MailMessage(Email, String.Format("{0}@tmomail.net", PhoneNumber),"",String.Format("Hey there! You have {0} assignments due in the future. Make sure to check Canvas and do them!",AssignmentsDue));
 
 
                 SmtpClient EmailClient = new SmtpClient("smtp.gmail.com");
